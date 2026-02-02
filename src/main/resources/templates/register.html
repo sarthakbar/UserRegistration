@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create Account</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
+
+    <script src="/webjars/jquery/3.6.4/jquery.min.js"></script>
+
+    <!-- 🔒 JS LOGIC UNCHANGED -->
+    <script>
+    $(document).ready(function () {
+
+      function loadStates(countryId, selectedStateId) {
+        $("#stateId").empty().append('<option value="">-select-</option>');
+        $("#cityId").empty().append('<option value="">-select-</option>');
+
+        if (!countryId) return;
+
+        $.get("/states/" + countryId, function (data) {
+          $.each(data, function (key, value) {
+            $("#stateId").append(
+              $('<option>', { value: key, text: value })
+            );
+          });
+
+          if (selectedStateId) {
+            $("#stateId").val(selectedStateId);
+          }
+        });
+      }
+
+      function loadCities(stateId, selectedCityId) {
+        $("#cityId").empty().append('<option value="">-select-</option>');
+
+        if (!stateId) return;
+
+        $.get("/cities/" + stateId, function (data) {
+          $.each(data, function (key, value) {
+            $("#cityId").append(
+              $('<option>', { value: key, text: value })
+            );
+          });
+
+          if (selectedCityId) {
+            $("#cityId").val(selectedCityId);
+          }
+        });
+      }
+
+      let countryId = $("#countryId").val();
+      let stateId   = $("#stateId").val();
+      let cityId    = $("#cityId").val();
+
+      if (countryId) loadStates(countryId, stateId);
+      if (stateId)   loadCities(stateId, cityId);
+
+      $("#countryId").change(function () {
+        loadStates($(this).val(), null);
+      });
+
+      $("#stateId").change(function () {
+        loadCities($(this).val(), null);
+      });
+
+    });
+    </script>
+</head>
+
+<body class="bg-light">
+
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+
+    <div class="card shadow-sm p-4" style="width:100%; max-width:600px;">
+
+        <!-- Messages -->
+        <div th:if="${emsg}" class="alert alert-danger text-center">
+            <span th:text="${emsg}"></span>
+        </div>
+
+        <div th:if="${smsg}" class="alert alert-success text-center">
+            <span th:text="${smsg}"></span>
+        </div>
+
+        <h3 class="text-center mb-4">Create Account</h3>
+
+        <form th:action="@{/register}" th:object="${registerForm}" method="post">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" th:field="*{name}" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" th:field="*{email}" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Phone No</label>
+                    <input type="text" class="form-control" th:field="*{phno}" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Country</label>
+                    <select class="form-select" th:field="*{countryId}" id="countryId">
+                        <option value="">-select-</option>
+                        <option th:each="entry : ${countries}"
+                                th:value="${entry.key}"
+                                th:text="${entry.value}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">State</label>
+                    <select class="form-select" th:field="*{stateId}" id="stateId">
+                        <option value="">-select-</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">City</label>
+                    <select class="form-select" th:field="*{cityId}" id="cityId">
+                        <option value="">-select-</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-primary">
+                    Register
+                </button>
+            </div>
+
+        </form>
+
+        <div class="text-center mt-3">
+            <span class="text-muted">Already have an account?</span><br>
+            <a href="/" class="fw-semibold text-decoration-none">Login Here</a>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>
